@@ -14,12 +14,14 @@ import org.apache.kafka.clients.producer.{KafkaProducer, ProducerConfig, Produce
 import java.util.Properties
 import org.apache.kafka.clients.consumer.{ConsumerConfig, KafkaConsumer}
 import org.apache.kafka.common.serialization.StringDeserializer
+import SpotifyAuthClient.getAccessToken
 
+/*
 // JSON handling support
 // how to serialize and deserialize JSON data (converting between JSON and Scala objects)
-trait JsonSupport extends DefaultJsonProtocol {
+/*trait JsonSupport extends DefaultJsonProtocol {
   implicit val apiResponseFormat: RootJsonFormat[ApiResponse] = jsonFormat1(ApiResponse)
-}
+}*/
 
 // Case class to represent API response
 case class ApiResponse(url: String)
@@ -105,3 +107,4 @@ object AkkaHttpClient extends App with JsonSupport {
     system.terminate()
   }
 }
+*/
