@@ -3,7 +3,7 @@ import akka.actor.{ActorSystem, Cancellable}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
-import akka.stream.ActorMaterializer
+import akka.stream.{ActorMaterializer, Materializer}
 import akka.http.scaladsl.model.headers.BasicHttpCredentials
 import org.apache.kafka.clients.producer.ProducerRecord
 import spray.json._
@@ -13,27 +13,27 @@ import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 import scala.util.{Failure, Success}
 
 
+
+
+
+
 // JSON handling support
 // how to serialize and deserialize JSON data (converting between JSON and Scala objects)
-trait JsonSupport extends DefaultJsonProtocol {
-  implicit val authResponseFormat: RootJsonFormat[AuthResponse] = jsonFormat1(AuthResponse)
+trait JsonSupport2 extends DefaultJsonProtocol {
+  implicit val authResponseFormat: RootJsonFormat[APIResponse] = jsonFormat1(APIResponse)
 }
 
 // Case class to represent API response
-case class AuthResponse(access_token: String)
+case class APIResponse(access_token: String)
 
-object SpotifyAuthClient extends App with JsonSupport{
+object SpotifyAuthClient extends App with JsonSupport2{
 
-  /*implicit val system: ActorSystem = ActorSystem()
-  implicit val materializer: ActorMaterializer = ActorMaterializer()
-  implicit val executionContext: ExecutionContextExecutor = system.dispatcher*/
 
   case class AccessToken(access_token: String, token_type: String, expires_in: Int)
 
-  val clientId = "0601d2709b8444d3bd669a0a052e4bca"
-  val clientSecret = "97efc1dc3931457caa40e25fdc33bced"
 
-  def getAccessToken(implicit system: ActorSystem, materializer: ActorMaterializer, executionContext: ExecutionContextExecutor): Future[String] = {
+
+  def getAccessToken(implicit system: ActorSystem, materializer: ActorMaterializer, executionContext: ExecutionContextExecutor, clientId: String, clientSecret:String): Future[String] = {
   //def getAccessToken(): Future[String] = {
 
     val authHeader = headers.Authorization(BasicHttpCredentials(clientId, clientSecret))
@@ -47,19 +47,7 @@ object SpotifyAuthClient extends App with JsonSupport{
         entity = entity
       )
     )
-    println(responseFuture)
-    println("y")
-    /*
-    responseFuture.onComplete {
-      case Success(response) =>  response.entity.toStrict(5.seconds).onComplete {
-        case Success(strictEntity) =>
-          val jsonString = strictEntity.data.utf8String
-          println(s"JSON response: $jsonString")
-          val jsonParsed = jsonString.parseJson
-          println(s"Parsed JSON response: $jsonParsed")
-          val accessToken = jsonParsed.convertTo[AuthResponse].access_token
-          accessToken
-      }}*/
+
 
     responseFuture.flatMap { response =>
       response.entity.toStrict(5.seconds).flatMap { strictEntity =>
@@ -67,14 +55,14 @@ object SpotifyAuthClient extends App with JsonSupport{
         print(jsonString)
         val jsonParsed = jsonString.parseJson
         println(jsonParsed)
-        val accessToken = jsonParsed.convertTo[AuthResponse].access_token
+        val accessToken = jsonParsed.convertTo[APIResponse].access_token
         Future.successful(accessToken)
       }
     }
+  }
 
-
-    }
-  /*// Handle the future and print the access token
+/*
+  // Handle the future and print the access token
   getAccessToken.onComplete {
     case Success(token) => println(s"Access token: $token")
     case Failure(exception) => println(s"Failed to get access token: $exception")
@@ -84,5 +72,7 @@ object SpotifyAuthClient extends App with JsonSupport{
   Thread.sleep(10000)
 
   // Terminate the actor system
-  system.terminate()
-  }*/}
+  system.terminate()*/
+  }
+
+
