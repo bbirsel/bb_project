@@ -12,7 +12,7 @@
     props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
     val consumer = new KafkaConsumer[String, String](props)
-    consumer.subscribe(Collections.singletonList("DogAPITopic"))
+    consumer.subscribe(Collections.singletonList("SpotifyAPITopic"))
 
     while (true) {
       val records = consumer.poll(100)

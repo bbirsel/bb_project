@@ -19,12 +19,7 @@ object Main extends App{
 
   val clientId = "99198d9242074487b1de6c4a4354bf53"
   val clientSecret = "ba42a630685e4e58b2db170483868c68"
-  // Call the method to get the access token from SpotifyAuthClient
-  /*val accessTokenFuture = SpotifyAuthClient.getAccessToken.onComplete {
-      case Success(token) => println(s"Access token: $token")
-      case Failure(exception) => println(s"Failed to get access token: $exception")
-    }*/
-  //println(accessTokenFuture)
+
 
   // kafka initialization
   val props = new Properties()
@@ -32,7 +27,7 @@ object Main extends App{
   props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer")
   props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer")
 
-  val producer = new KafkaProducer[String, String](props)
+  val producer = new KafkaProducer[String, List[String]](props)
   val topic = "SpotifyAPITopic"
 
   // Once you have the access token, you can use it to call the method from SpotifyApiClient
@@ -42,7 +37,7 @@ object Main extends App{
           case Success(response) =>
             println(s"Fetched: $response")
             // kafka producer
-            val record = new ProducerRecord[String, String](topic, "key", response)
+            val record = new ProducerRecord[String, List[String]](topic, "key", response)
             //The send() method is asynchronous. When called it adds the record to a buffer of pending
             // record sends and immediately returns.
             producer.send(record)
