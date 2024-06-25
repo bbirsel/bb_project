@@ -1,4 +1,5 @@
 
+import Main.{producer, topic}
 import akka.actor.{ActorSystem, Cancellable}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
@@ -28,16 +29,18 @@ case class APIResponse(access_token: String)
 
 object SpotifyAuthClient extends App with JsonSupport2{
 
-
-  case class AccessToken(access_token: String, token_type: String, expires_in: Int)
-
-
+  //case class AccessToken(access_token: String, token_type: String, expires_in: Int)
 
   def getAccessToken(implicit system: ActorSystem, materializer: ActorMaterializer, executionContext: ExecutionContextExecutor, clientId: String, clientSecret:String): Future[String] = {
   //def getAccessToken(): Future[String] = {
 
+    // used to pass authentication information from the client to the server
     val authHeader = headers.Authorization(BasicHttpCredentials(clientId, clientSecret))
+    // create the body of the HTTP POST request that will be sent to Spotify's token
+    // endpoint to request an access token
     val entity = FormData("grant_type" -> "client_credentials").toEntity
+
+    // POST request made to Spotify's token endpoint
 
     val responseFuture = Http().singleRequest(
       HttpRequest(
@@ -48,14 +51,34 @@ object SpotifyAuthClient extends App with JsonSupport2{
       )
     )
 
+   /* responseFuture.onComplete {
+      case Success(token) => val jsonString = token.toString()
+        print(jsonString)
+        // JSON string from the response is parsed into a JSON object
+        val jsonParsed = jsonString.parseJson
+        println(jsonParsed)
+        // extract access token
+        jsonParsed.convertTo[APIResponse].access_token
 
+
+    }
+  }*/
+
+    // single request methods
+
+    // ensure asynchronous processing with flatmap
     responseFuture.flatMap { response =>
+      // strict entity: HTTP entity that has been fully materialized or loaded into memory,
+      // allowing you to work with it as a complete object.
       response.entity.toStrict(5.seconds).flatMap { strictEntity =>
         val jsonString = strictEntity.data.utf8String
         print(jsonString)
+        // JSON string from the response is parsed into a JSON object
         val jsonParsed = jsonString.parseJson
         println(jsonParsed)
+        // extract access token
         val accessToken = jsonParsed.convertTo[APIResponse].access_token
+        // Return the access token as a successful future
         Future.successful(accessToken)
       }
     }

@@ -42,11 +42,11 @@ object SpotifyApiClient extends App with JsonSupport {
 
 
 
-  def getMyPlaylist(accessToken: String)(implicit system: ActorSystem, materializer: ActorMaterializer, executionContext: ExecutionContextExecutor): Future[List[String]] = {
+  def getMyPlaylist(accessToken: String, uri: String)(implicit system: ActorSystem, materializer: ActorMaterializer, executionContext: ExecutionContextExecutor): Future[List[String]] = {
     val authHeader = headers.Authorization(OAuth2BearerToken(accessToken))
     val request = HttpRequest(
       method = HttpMethods.GET,
-      uri = "https://api.spotify.com/v1/playlists/7HV1vvwRIt7jki0mjnEt9H",
+      uri = uri,
       headers = List(authHeader)
     )
 
